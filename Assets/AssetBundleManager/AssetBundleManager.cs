@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 #if UNITY_EDITOR	
 using UnityEditor;
 #endif
@@ -50,7 +51,7 @@ namespace AssetBundles
 #endif
 	
 		static Dictionary<string, LoadedAssetBundle> s_LoadedAssetBundles = new Dictionary<string, LoadedAssetBundle> ();
-		static Dictionary<string, WWW> s_DownloadingWwWs = new Dictionary<string, WWW> ();
+		static Dictionary<string, UnityWebRequest> s_DownloadingWebrequests = new Dictionary<string, UnityWebRequest> ();
 		static Dictionary<string, string> s_DownloadingErrors = new Dictionary<string, string> ();
 		static List<AssetBundleLoadOperation> s_InProgressOperations = new List<AssetBundleLoadOperation> ();
 		static Dictionary<string, string[]> s_Dependencies = new Dictionary<string, string[]> ();
@@ -298,19 +299,20 @@ namespace AssetBundles
 			// @TODO: Do we need to consider the referenced count of WWWs?
 			// In the demo, we never have duplicate WWWs as we wait LoadAssetAsync()/LoadLevelAsync() to be finished before calling another LoadAssetAsync()/LoadLevelAsync().
 			// But in the real case, users can call LoadAssetAsync()/LoadLevelAsync() several times then wait them to be finished which might have duplicate WWWs.
-			if (s_DownloadingWwWs.ContainsKey(assetBundleName) )
+			if (s_DownloadingWebrequests.ContainsKey(assetBundleName) )
 				return true;
-	
-			WWW download;
+
+            UnityWebRequest download;
 			string url = s_BaseDownloadingUrl + assetBundleName;
 		
 			// For manifest assetbundle, always download it as we don't have hash for it.
 			if (isLoadingAssetBundleManifest)
-				download = new WWW(url);
+				download = UnityWebRequest.GetAssetBundle(url);
 			else
-				download = WWW.LoadFromCacheOrDownload(url, s_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0); 
-	
-			s_DownloadingWwWs.Add(assetBundleName, download);
+				download = UnityWebRequest.GetAssetBundle(url, s_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0);
+
+            download.Send();
+			s_DownloadingWebrequests.Add(assetBundleName, download);
 	
 			return false;
 		}
@@ -387,11 +389,11 @@ namespace AssetBundles
 			// Collect all the finished WWWs.
 			var keysToRemove = new List<string>();
 
-			if (s_DownloadingWwWs.Count > 0)
+			if (s_DownloadingWebrequests.Count > 0)
 			{
-				foreach (var keyValue in s_DownloadingWwWs)
+				foreach (var keyValue in s_DownloadingWebrequests)
 				{
-					WWW download = keyValue.Value;
+                    UnityWebRequest download = keyValue.Value;
 
 					// If downloading fails.
 					if (download.error != null)
@@ -404,7 +406,7 @@ namespace AssetBundles
 					// If downloading succeeds.
 					if (download.isDone)
 					{
-						AssetBundle bundle = download.assetBundle;
+						AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(download);
 						if (bundle == null)
 						{
 							s_DownloadingErrors.Add(keyValue.Key, string.Format("{0} is not a valid asset bundle.", keyValue.Key));
@@ -412,7 +414,7 @@ namespace AssetBundles
 							continue;
 						}
 
-						s_LoadedAssetBundles.Add(keyValue.Key, new LoadedAssetBundle(download.assetBundle));
+						s_LoadedAssetBundles.Add(keyValue.Key, new LoadedAssetBundle(bundle));
 						keysToRemove.Add(keyValue.Key);
 					}
 				}
@@ -421,8 +423,8 @@ namespace AssetBundles
 			// Remove the finished WWWs.
 			foreach( var key in keysToRemove)
 			{
-				WWW download = s_DownloadingWwWs[key];
-				s_DownloadingWwWs.Remove(key);
+                UnityWebRequest download = s_DownloadingWebrequests[key];
+				s_DownloadingWebrequests.Remove(key);
 				download.Dispose();
 			}
 	
