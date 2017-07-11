@@ -2,7 +2,13 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
-using System;
+#if UNITY_ADS
+using UnityEngine.Advertisements;
+#endif
+#if UNITY_ANALYTICS
+using UnityEngine.Analytics;
+using UnityEngine.Analytics.Experimental;
+#endif
 
 /// <summary>
 /// Pushed on top of the GameManager during gameplay. Takes care of initializing all the UI and start the TrackManager
@@ -33,12 +39,22 @@ public class GameState : AState
 
     public Image inventoryIcon;
 
+    public GameObject gameOverPopup;
+    public GameObject premiumForLifeButton;
+    public GameObject adsForLifeButton;
+
     [Header("Prefabs")]
     public GameObject PowerupIconPrefab;
 
 	public Modifier currentModifier = new Modifier();
 
-	protected bool m_Finished;
+    public string adsPlacementId = "rewardedVideo";
+#if UNITY_ANALYTICS
+    public AdvertisingNetwork adsNetwork = AdvertisingNetwork.UnityAds;
+#endif
+    public bool adsRewarded = true;
+
+    protected bool m_Finished;
     protected float m_TimeSinceStart;
     protected List<PowerupIcon> m_PowerupIcons = new List<PowerupIcon>();
 	protected Image[] m_LifeHearts;
@@ -50,38 +66,22 @@ public class GameState : AState
 
     public override void Enter(AState from)
     {
-        canvas.gameObject.SetActive(true);
-		pauseMenu.gameObject.SetActive (false);
-		wholeUI.gameObject.SetActive(true);
-		pauseButton.gameObject.SetActive(true);
+        m_CountdownRectTransform = countdownText.GetComponent<RectTransform>();
 
-		m_CountdownRectTransform = countdownText.GetComponent<RectTransform>();
-
-		if (!trackManager.isRerun)
+        m_LifeHearts = new Image[k_MaxLives];
+        for (int i = 0; i < k_MaxLives; ++i)
         {
-            m_TimeSinceStart = 0;
-            trackManager.characterController.currentLife = trackManager.characterController.maxLife;
+            m_LifeHearts[i] = lifeRectTransform.GetChild(i).GetComponent<Image>();
         }
 
-		currentModifier.OnRunStart(this);
-		trackManager.Begin();
-
-		m_LifeHearts = new Image[k_MaxLives];
-		for(int i = 0; i < k_MaxLives; ++i)
-		{
-			m_LifeHearts[i] = lifeRectTransform.GetChild(i).GetComponent<Image>();
-		}
-
-		m_Finished = false;
-
-		m_PowerupIcons.Clear();
-
-		if (MusicPlayer.instance.GetStem(0) != gameTheme)
-		{
+        if (MusicPlayer.instance.GetStem(0) != gameTheme)
+        {
             MusicPlayer.instance.SetStem(0, gameTheme);
-			StartCoroutine (MusicPlayer.instance.RestartAllStems ());
+            CoroutineHandler.StartStaticCoroutine(MusicPlayer.instance.RestartAllStems());
         }
-	}
+
+        StartGame();
+    }
 
     public override void Exit(AState to)
     {
@@ -94,6 +94,28 @@ public class GameState : AState
 		}
 
 		m_PowerupIcons.Clear ();
+    }
+
+    public void StartGame()
+    {
+        canvas.gameObject.SetActive(true);
+        pauseMenu.gameObject.SetActive(false);
+        wholeUI.gameObject.SetActive(true);
+        pauseButton.gameObject.SetActive(true);
+        gameOverPopup.SetActive(false);
+
+        if (!trackManager.isRerun)
+        {
+            m_TimeSinceStart = 0;
+            trackManager.characterController.currentLife = trackManager.characterController.maxLife;
+        }
+
+        currentModifier.OnRunStart(this);
+        trackManager.Begin();
+
+        m_Finished = false;
+
+        m_PowerupIcons.Clear();
     }
 
     public override string GetName()
@@ -269,7 +291,121 @@ public class GameState : AState
         Shader.SetGlobalFloat("_BlinkingValue", 0.0f);
 
         yield return new WaitForSeconds(2.0f);
-		if(currentModifier.OnRunEnd(this))
-			manager.SwitchState("GameOver");
+        if (currentModifier.OnRunEnd(this))
+        {
+            if (trackManager.isRerun)
+                manager.SwitchState("GameOver");
+            else
+                OpenGameOverPopup();
+        }
 	}
+
+    public void OpenGameOverPopup()
+    {
+#if UNITY_ADS
+		if (Advertisement.IsReady(adsPlacementId))
+		{
+            adsForLifeButton.SetActive(true);
+#if UNITY_ANALYTICS
+            AnalyticsEvent.AdOffer(adsRewarded, adsNetwork, adsPlacementId, new Dictionary<string, object>
+            {
+                { "level_index", PlayerData.instance.rank },
+                { "distance", TrackManager.instance == null ? 0 : TrackManager.instance.worldDistance },
+            });
+#endif
+        }
+        else
+            adsForLifeButton.SetActive(false);
+#endif
+
+        if (PlayerData.instance.premium >= 3)
+            premiumForLifeButton.SetActive(true);
+        else
+            premiumForLifeButton.SetActive(false);
+
+        //if we can't neither buy a new chance nor watch ads, gameover directly
+        if (!premiumForLifeButton.activeSelf && !adsForLifeButton.activeSelf)
+            GameOver();
+
+        gameOverPopup.SetActive(true);
+    }
+
+    public void GameOver()
+    {
+        manager.SwitchState("GameOver");
+    }
+
+    public void PremiumForLife()
+    {
+        PlayerData.instance.premium -= 3;
+        SecondWind();
+    }
+
+    public void SecondWind()
+    {
+        trackManager.characterController.currentLife = 1;
+        trackManager.isRerun = true;
+        StartGame();
+    }
+
+    public void ShowRewardedAd()
+    {
+#if UNITY_ADS
+        if (Advertisement.IsReady(adsPlacementId))
+        {
+#if UNITY_ANALYTICS
+            AnalyticsEvent.AdStart(adsRewarded, adsNetwork, adsPlacementId, new Dictionary<string, object>
+            {
+                { "level_index", PlayerData.instance.rank },
+                { "distance", TrackManager.instance == null ? 0 : TrackManager.instance.worldDistance },
+            });
+#endif
+
+            adsForLifeButton.GetComponentInChildren<Text>().text = "Loading...";
+            var options = new ShowOptions { resultCallback = HandleShowResult };
+            Advertisement.Show(adsPlacementId, options);
+        }
+        else
+        {
+#if UNITY_ANALYTICS
+            AnalyticsEvent.AdSkip(adsRewarded, adsNetwork, adsPlacementId, new Dictionary<string, object> {
+                { "error", Advertisement.GetPlacementState(adsPlacementId).ToString() }
+            });
+#endif
+        }
+#else
+		GameOver();
+#endif
+    }
+
+    //=== AD
+#if UNITY_ADS
+
+    private void HandleShowResult(ShowResult result)
+    {
+        switch (result)
+        {
+            case ShowResult.Finished:
+#if UNITY_ANALYTICS
+                AnalyticsEvent.AdComplete(adsRewarded, adsNetwork, adsPlacementId);
+#endif
+                SecondWind();
+                break;
+            case ShowResult.Skipped:
+                Debug.Log("The ad was skipped before reaching the end.");
+#if UNITY_ANALYTICS
+                AnalyticsEvent.AdSkip(adsRewarded, adsNetwork, adsPlacementId);
+#endif
+                break;
+            case ShowResult.Failed:
+                Debug.LogError("The ad failed to be shown.");
+#if UNITY_ANALYTICS
+                AnalyticsEvent.AdSkip(adsRewarded, adsNetwork, adsPlacementId, new Dictionary<string, object> {
+                    { "error", "failed" }
+                });
+#endif
+                break;
+        }
+    }
+#endif
 }
