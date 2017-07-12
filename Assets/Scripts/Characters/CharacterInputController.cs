@@ -263,7 +263,7 @@ public class CharacterInputController : MonoBehaviour
 					verticalTargetPosition.y = Mathf.Sin(ratio * Mathf.PI) * jumpHeight;
 				}
 			}
-			else
+			else if(!AudioListener.pause)//use AudioListener.pause as it is an easily accessible singleton & it is set when the app is in pause too
 			{
 			    verticalTargetPosition.y = Mathf.MoveTowards (verticalTargetPosition.y, 0, k_GroundingSpeed * Time.deltaTime);
 				if (Mathf.Approximately(verticalTargetPosition.y, 0f))

@@ -108,7 +108,7 @@ namespace AssetBundles
 			BuildPipeline.BuildPlayer(levels, outputPath + targetName, EditorUserBuildSettings.activeBuildTarget, option);
 
 			//clean after
-			Directory.Delete(path, true);
+			Directory.Delete(path+"/AssetBundles", true);
 			AssetDatabase.Refresh();
 		}
 	
@@ -137,7 +137,7 @@ namespace AssetBundles
 		static void CopyAssetBundlesTo(string outputPath)
 		{
 			// Clear streaming assets folder.
-			FileUtil.DeleteFileOrDirectory(Application.streamingAssetsPath);
+			FileUtil.DeleteFileOrDirectory(outputPath);
 			Directory.CreateDirectory(outputPath);
 	
 			string outputFolder = Utility.GetPlatformName();
