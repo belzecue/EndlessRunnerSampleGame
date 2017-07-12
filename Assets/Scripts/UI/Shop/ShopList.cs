@@ -12,8 +12,8 @@ public abstract class ShopList : MonoBehaviour
 
     public void Open()
     {
-        gameObject.SetActive(true);
         Populate();
+        gameObject.SetActive(true);
     }
 
     public void Close()
