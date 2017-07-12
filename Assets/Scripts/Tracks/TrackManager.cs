@@ -246,7 +246,7 @@ public class TrackManager : MonoBehaviour
 		//if our consumable wasn't used, we put it back in our inventory
 		if (characterController.inventory != null) 
 		{
-			PlayerData.instance.consumables [characterController.inventory.GetConsumableType ()] += 1;
+            PlayerData.instance.Add(characterController.inventory.GetConsumableType());
 			characterController.inventory = null;
 		}
 	}
