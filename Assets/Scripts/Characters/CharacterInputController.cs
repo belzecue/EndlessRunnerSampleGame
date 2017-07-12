@@ -341,9 +341,6 @@ public class CharacterInputController : MonoBehaviour
 		if (!trackManager.isMoving)
 			return;
 
-		if (m_Sliding)
-			StopSliding();
-
         int targetLane = m_CurrentLane + direction;
 
         if (targetLane < 0 || targetLane > 2)
