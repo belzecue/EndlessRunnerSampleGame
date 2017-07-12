@@ -40,8 +40,9 @@ public class GameState : AState
     public Image inventoryIcon;
 
     public GameObject gameOverPopup;
-    public GameObject premiumForLifeButton;
+    public Button premiumForLifeButton;
     public GameObject adsForLifeButton;
+    public Text premiumCurrencyOwned;
 
     [Header("Prefabs")]
     public GameObject PowerupIconPrefab;
@@ -318,14 +319,9 @@ public class GameState : AState
             adsForLifeButton.SetActive(false);
 #endif
 
-        if (PlayerData.instance.premium >= 3)
-            premiumForLifeButton.SetActive(true);
-        else
-            premiumForLifeButton.SetActive(false);
+        premiumForLifeButton.interactable = PlayerData.instance.premium >= 3;
 
-        //if we can't neither buy a new chance nor watch ads, gameover directly
-        if (!premiumForLifeButton.activeSelf && !adsForLifeButton.activeSelf)
-            GameOver();
+        premiumCurrencyOwned.text = PlayerData.instance.premium.ToString();
 
         gameOverPopup.SetActive(true);
     }
