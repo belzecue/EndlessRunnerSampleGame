@@ -267,6 +267,13 @@ public class LoadoutState : AState
                     m_Character = newChar;
                     charNameDisplay.text = c.characterName;
 
+                    m_Character.transform.localPosition = Vector3.right * 1000;
+                    //animator will take a frame to initialize, during which the character will be in a T-pose.
+                    //So we move the character off screen, wait that initialised frame, then move the character back in place.
+                    //That avoid an ugly "T-pose" flash time
+                    yield return new WaitForEndOfFrame();
+                    m_Character.transform.localPosition = Vector3.zero;
+
                     SetupAccessory();
                 }
                 else
