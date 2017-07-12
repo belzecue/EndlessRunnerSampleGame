@@ -356,7 +356,7 @@ public class CharacterInputController : MonoBehaviour
 
     public void UseInventory()
     {
-        if(inventory != null)
+        if(inventory != null && inventory.CanBeUsed(this))
         {
             UseConsumable(inventory);
             inventory = null;

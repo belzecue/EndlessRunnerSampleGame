@@ -26,7 +26,15 @@ public class ExtraLife : Consumable
 		return 5;
 	}
 
-	public override void Started(CharacterInputController c)
+    public override bool CanBeUsed(CharacterInputController c)
+    {
+        if (c.currentLife == c.maxLife)
+            return false;
+
+        return true;
+    }
+
+    public override void Started(CharacterInputController c)
     {
         base.Started(c);
         if (c.currentLife < k_MaxLives)

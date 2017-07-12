@@ -43,6 +43,12 @@ public abstract class Consumable : MonoBehaviour
         m_SinceStart = 0;
     }
 
+    //override this to do test to make a consumable not usable (e.g. used by the ExtraLife to avoid using it when at full health)
+    public virtual bool CanBeUsed(CharacterInputController c)
+    {
+        return true;
+    }
+
     public virtual void Started(CharacterInputController c)
     {
         m_SinceStart = 0;
