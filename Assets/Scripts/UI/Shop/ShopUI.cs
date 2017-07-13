@@ -22,6 +22,7 @@ public class ShopUI : MonoBehaviour
     [Header("UI")]
     public Text coinCounter;
     public Text premiumCounter;
+    public Button cheatButton;
 
     protected ShopList m_OpenList;
 
@@ -40,6 +41,13 @@ public class ShopUI : MonoBehaviour
 
 #if UNITY_ANALYTICS
         AnalyticsEvent.StoreOpened(StoreType.Soft);
+#endif
+
+#if !UNITY_EDITOR && !DEVELOPMENT_BUILD
+        //Disable cheating on non dev build outside of the editor
+        cheatButton.interactable = false;
+#else
+        cheatButton.interactable = true;
 #endif
 
         m_OpenList = itemList;
