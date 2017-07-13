@@ -19,6 +19,21 @@ Now go into 'Plugins/UnityPurchasing/Resources' and look for UIFakeStoreCanvas
 prefab, and change the Canvas sort order to 100. That will make it appear on
 top of all canvas in the game, useful to test IAP in editor.
 
+Ads integrations
+----------------
+
+Ads integration is using multiple placementID. That allow to define different behaviour per ads.
+If you look at the ads script (e.g. AdsForMission and GameState) you'll see it have a public field called adsPlacementId.
+(those value are set in editor to different value that the default rewardVideo)
+
+Now if you log into your Ads Dashboard in a browser and navigate to your project, click on a platform,
+you will have a list of Ad Placement. There you can add new placement. By default Trash Dash use 2 in addition
+to the default "rewardVideo" and "Video" :
+
+- reviveVideo, used to have a second chance after game over
+- missionVideo, used to get a thrid possible missions.
+
+
 AssetBundle Testing
 -------------------
 

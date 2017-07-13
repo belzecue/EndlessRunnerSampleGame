@@ -12,6 +12,8 @@ using UnityEngine.Analytics.Experimental;
 public class AdsForMission : MonoBehaviour
 {
     public MissionUI missionUI;
+
+    public Text newMissionText;
     public Button adsButton;
 #if UNITY_ANALYTICS
     public AdvertisingNetwork adsNetwork = AdvertisingNetwork.UnityAds;
@@ -22,6 +24,7 @@ public class AdsForMission : MonoBehaviour
     void OnEnable ()
     {
         adsButton.gameObject.SetActive(false);
+        newMissionText.gameObject.SetActive(false);
 
         // Only present an ad offer if less than 3 missions.
         if (PlayerData.instance.missions.Count >= 3)
@@ -41,6 +44,8 @@ public class AdsForMission : MonoBehaviour
             });
 #endif
         }
+
+        newMissionText.gameObject.SetActive(isReady);
         adsButton.gameObject.SetActive(isReady);
 #endif
     }
