@@ -310,7 +310,7 @@ public class CharacterInputController : MonoBehaviour
 
 	public void Slide()
 	{
-		if (!m_Sliding)
+		if (!m_Sliding && !m_Jumping)
 		{
             float correctSlideLength = slideLength * (1.0f + trackManager.speedRatio); 
 			m_SlideStart = trackManager.worldDistance;
