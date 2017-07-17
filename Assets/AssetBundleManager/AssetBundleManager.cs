@@ -396,7 +396,7 @@ namespace AssetBundles
                     UnityWebRequest download = keyValue.Value;
 
 					// If downloading fails.
-					if (download.error != null)
+					if (!string.IsNullOrEmpty(download.error))
 					{
 						s_DownloadingErrors.Add(keyValue.Key, string.Format("Failed downloading bundle {0} from {1}: {2}", keyValue.Key, download.url, download.error));
 						keysToRemove.Add(keyValue.Key);
