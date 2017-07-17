@@ -64,6 +64,7 @@ public class GameState : AState
     protected bool m_WasMoving;
 
     protected bool m_AdsInitialised = false;
+    protected bool m_GameoverSelectionDone = false;
 
     protected int k_MaxLives = 3;
 
@@ -84,6 +85,7 @@ public class GameState : AState
         }
 
         m_AdsInitialised = false;
+        m_GameoverSelectionDone = false;
 
         StartGame();
     }
@@ -350,6 +352,14 @@ public class GameState : AState
 
     public void PremiumForLife()
     {
+        //This check avoid a bug where the video AND premium button are released on the same frame.
+        //It lead to the ads playing and then crashing the game as it try to start the second wind again.
+        //Whichever of those function run first will take precedence
+        if (m_GameoverSelectionDone)
+            return;
+
+        m_GameoverSelectionDone = true;
+
         PlayerData.instance.premium -= 3;
         SecondWind();
     }
@@ -363,6 +373,11 @@ public class GameState : AState
 
     public void ShowRewardedAd()
     {
+        if (m_GameoverSelectionDone)
+            return;
+
+        m_GameoverSelectionDone = true;
+
 #if UNITY_ADS
         if (Advertisement.IsReady(adsPlacementId))
         {
