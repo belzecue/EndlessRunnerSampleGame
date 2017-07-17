@@ -92,13 +92,7 @@ public class GameState : AState
     {
         canvas.gameObject.SetActive(false);
 
-        for (int i = 0; i < m_PowerupIcons.Count; ++i)
-		{
-			if(m_PowerupIcons[i] != null)
-				Destroy(m_PowerupIcons[i].gameObject);
-		}
-
-		m_PowerupIcons.Clear ();
+        ClearPowerup();
     }
 
     public void StartGame()
@@ -148,6 +142,8 @@ public class GameState : AState
             }
             else if(!m_AdsInitialised)
                 adsForLifeButton.SetActive(false);
+#else
+            adsForLifeButton.SetActive(false); //Ads is disabled
 #endif
 
             return;
@@ -325,11 +321,24 @@ public class GameState : AState
         }
 	}
 
+    protected void ClearPowerup()
+    {
+        for (int i = 0; i < m_PowerupIcons.Count; ++i)
+        {
+            if (m_PowerupIcons[i] != null)
+                Destroy(m_PowerupIcons[i].gameObject);
+        }
+
+        m_PowerupIcons.Clear();
+    }
+
     public void OpenGameOverPopup()
     {
         premiumForLifeButton.interactable = PlayerData.instance.premium >= 3;
 
         premiumCurrencyOwned.text = PlayerData.instance.premium.ToString();
+
+        ClearPowerup();
 
         gameOverPopup.SetActive(true);
     }
