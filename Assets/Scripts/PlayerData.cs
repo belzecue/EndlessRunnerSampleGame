@@ -60,7 +60,7 @@ public class PlayerData
     // This will allow us to add data even after production, and so keep all existing save STILL valid. See loading & saving for how it work.
     // Note in a real production it would probably reset that to 1 before release (as all dev save don't have to be compatible w/ final product)
     // Then would increment again with every subsequent patches. We kept it to its dev value here for teaching purpose. 
-    static int s_Version = 10; 
+    static int s_Version = 11; 
 
     public void Consume(Consumable.ConsumableType type)
     {
@@ -277,7 +277,14 @@ public class PlayerData
         int charCount = r.ReadInt32();
         for(int i = 0; i < charCount; ++i)
         {
-            characters.Add(r.ReadString());
+            string charName = r.ReadString();
+
+            if (charName.Contains("Raccoon") && ver < 11)
+            {//in 11 version, we renamed Raccoon (fixing spelling) so we need to patch the save to give the character if player had it already
+                charName = charName.Replace("Racoon", "Raccoon");
+            }
+
+            characters.Add(charName);
         }
 
         usedCharacter = r.ReadInt32();
