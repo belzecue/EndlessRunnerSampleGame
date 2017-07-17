@@ -63,6 +63,8 @@ public class GameState : AState
     protected RectTransform m_CountdownRectTransform;
     protected bool m_WasMoving;
 
+    protected bool m_AdsInitialised = false;
+
     protected int k_MaxLives = 3;
 
     public override void Enter(AState from)
@@ -80,6 +82,8 @@ public class GameState : AState
             MusicPlayer.instance.SetStem(0, gameTheme);
             CoroutineHandler.StartStaticCoroutine(MusicPlayer.instance.RestartAllStems());
         }
+
+        m_AdsInitialised = false;
 
         StartGame();
     }
@@ -126,8 +130,28 @@ public class GameState : AState
 
     public override void Tick()
     {
-		if (m_Finished)
-			return;
+        if (m_Finished)
+        {
+            //if we are finished, we check if advertisement is ready, allow to disable the button until it is ready
+#if UNITY_ADS
+            if (!m_AdsInitialised && Advertisement.IsReady(adsPlacementId))
+            {
+                adsForLifeButton.SetActive(true);
+                m_AdsInitialised = true;
+#if UNITY_ANALYTICS
+                AnalyticsEvent.AdOffer(adsRewarded, adsNetwork, adsPlacementId, new Dictionary<string, object>
+            {
+                { "level_index", PlayerData.instance.rank },
+                { "distance", TrackManager.instance == null ? 0 : TrackManager.instance.worldDistance },
+            });
+#endif
+            }
+            else if(!m_AdsInitialised)
+                adsForLifeButton.SetActive(false);
+#endif
+
+            return;
+        }
 
         CharacterInputController chrCtrl = trackManager.characterController;
 
@@ -303,22 +327,6 @@ public class GameState : AState
 
     public void OpenGameOverPopup()
     {
-#if UNITY_ADS
-		if (Advertisement.IsReady(adsPlacementId))
-		{
-            adsForLifeButton.SetActive(true);
-#if UNITY_ANALYTICS
-            AnalyticsEvent.AdOffer(adsRewarded, adsNetwork, adsPlacementId, new Dictionary<string, object>
-            {
-                { "level_index", PlayerData.instance.rank },
-                { "distance", TrackManager.instance == null ? 0 : TrackManager.instance.worldDistance },
-            });
-#endif
-        }
-        else
-            adsForLifeButton.SetActive(false);
-#endif
-
         premiumForLifeButton.interactable = PlayerData.instance.premium >= 3;
 
         premiumCurrencyOwned.text = PlayerData.instance.premium.ToString();
@@ -356,8 +364,6 @@ public class GameState : AState
                 { "distance", TrackManager.instance == null ? 0 : TrackManager.instance.worldDistance },
             });
 #endif
-
-            adsForLifeButton.GetComponentInChildren<Text>().text = "Loading...";
             var options = new ShowOptions { resultCallback = HandleShowResult };
             Advertisement.Show(adsPlacementId, options);
         }
