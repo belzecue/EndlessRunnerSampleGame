@@ -34,7 +34,7 @@ v2f vert(appdata v)
 
 
 	float dist = UNITY_Z_0_FAR_FROM_CLIPSPACE(o.vertex.z);
-#if UNITY_UV_STARTS_AT_TOP
+#if (!SHADER_API_MOBILE  && SHADER_API_GLCORE)
 	o.vertex.y += _CurveStrength * dist * dist;
 #else
 	o.vertex.y -= _CurveStrength * dist * dist;
