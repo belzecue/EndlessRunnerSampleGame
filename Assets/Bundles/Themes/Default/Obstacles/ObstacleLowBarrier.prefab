@@ -40,6 +40,7 @@ GameObject:
   - component: {fileID: 65000011028955966}
   - component: {fileID: 114000011742927702}
   - component: {fileID: 82000012920248836}
+  - component: {fileID: 114098358831157252}
   m_Layer: 9
   m_Name: ObstacleLowBarrier
   m_TagString: Untagged
@@ -133,8 +134,7 @@ AudioSource:
   m_GameObject: {fileID: 1000013842435444}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 243000013019083220, guid: 3b7e99a6684bf49fa9bad5f4bb585fab,
-    type: 2}
+  OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
@@ -233,3 +233,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   impactedSound: {fileID: 8300000, guid: 9ed08397b3fef21418662ed63130d301, type: 3}
+--- !u!114 &114098358831157252
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000013842435444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15e38bebbdc31db468a604b05bd1d75e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mixerGroup: SFX

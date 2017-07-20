@@ -27,15 +27,21 @@ public class AssetBundlesDatabaseHandler
 #else
         AssetBundleManager.BaseDownloadingURL = "file://" + Application.streamingAssetsPath + "/AssetBundles/"+Utility.GetPlatformName()+"/";
 #endif
+#else
+        AssetBundleManager.BaseDownloadingURL = "file://" + Application.streamingAssetsPath + "/AssetBundles/" + Utility.GetPlatformName() + "/";
 #endif
 
-		var request = AssetBundleManager.Initialize();
+        var request = AssetBundleManager.Initialize();
         if (request != null)
             yield return CoroutineHandler.StartStaticCoroutine(request);
 
         // In editor we can directly get all the bundles but in final build, we need to read them from the manifest.
 #if UNITY_EDITOR
-        string[] bundles = AssetDatabase.GetAllAssetBundleNames();
+        string[] bundles;
+        if(AssetBundleManager.SimulateAssetBundleInEditor)
+            bundles = AssetDatabase.GetAllAssetBundleNames();
+        else
+            bundles = AssetBundleManager.AssetBundleManifestObject.GetAllAssetBundles();
 #else
         string[] bundles = AssetBundleManager.AssetBundleManifestObject.GetAllAssetBundles();
 #endif

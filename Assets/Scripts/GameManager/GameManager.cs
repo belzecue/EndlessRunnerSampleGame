@@ -27,7 +27,6 @@ public class GameManager : MonoBehaviour
         s_Instance = this;
 
         m_ConsumableDatabase.Load();
-        AssetBundlesDatabaseHandler.Load();
 
         // We build a dictionnary from state for easy switching using their name.
         m_StateDict.Clear();
