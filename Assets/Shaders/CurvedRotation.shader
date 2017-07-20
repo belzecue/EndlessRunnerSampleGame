@@ -55,11 +55,8 @@ Shader "Unlit/CurvedRotation"
 			o.vertex = UnityObjectToClipPos(rotVert);
 
 			float dist = UNITY_Z_0_FAR_FROM_CLIPSPACE(o.vertex.z);
-#if (!SHADER_API_MOBILE  && SHADER_API_GLCORE)
-			o.vertex.y += _CurveStrength * dist * dist;
-#else
-			o.vertex.y -= _CurveStrength * dist * dist;
-#endif
+
+			o.vertex.y -= _CurveStrength * dist * dist * _ProjectionParams.x;
 
 			o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 			o.color = v.color;

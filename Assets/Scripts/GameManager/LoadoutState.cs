@@ -90,6 +90,13 @@ public class LoadoutState : AState
         runButton.interactable = false;
         runButton.GetComponentInChildren<Text>().text = "Loading...";
 
+        if(m_PowerupToUse != Consumable.ConsumableType.NONE)
+        {
+            //if we come back from a run and we don't have any more of the powerup we wanted to use, we reset the powerup to use to NONE
+            if (!PlayerData.instance.consumables.ContainsKey(m_PowerupToUse) || PlayerData.instance.consumables[m_PowerupToUse] == 0)
+                m_PowerupToUse = Consumable.ConsumableType.NONE;
+        }
+
         Refresh();
     }
 
