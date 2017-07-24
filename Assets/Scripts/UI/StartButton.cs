@@ -25,7 +25,6 @@ public class StartButton : MonoBehaviour
 
 #if UNITY_PURCHASING
         var module = StandardPurchasingModule.Instance();
-        module.useFakeStoreAlways = true;
 #endif
         SceneManager.LoadScene("main");
     }
