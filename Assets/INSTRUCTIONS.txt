@@ -1,3 +1,6 @@
+You can find more in depth explainations & articles on the project GitHub page
+https://github.com/Unity-Technologies/TrashDash
+
 #Code architecture notes
 
 This document isn't intended as a tutorial, but as global indications on how the
