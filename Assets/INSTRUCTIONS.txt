@@ -1,10 +1,28 @@
-You can find more in depth explainations & articles on the project GitHub page
-https://github.com/Unity-Technologies/TrashDash
+You can find more in depth explainations & articles on the project GitHub page wiki
+https://github.com/Unity-Technologies/TrashDash/wiki/
 
-#Code architecture notes
+Code architecture notes
+-----------------------
 
 This document isn't intended as a tutorial, but as global indications on how the
 code is organised.
+
+
+AssetBundle Testing
+-------------------
+
+To easily test in editor, set the AssetBundle manager into simulation mode
+To do this, go to the menu Assets > AssetBundles > Simulation Mode
+
+Building
+--------
+
+To build the game, you will first need to build the asset bundles. They can be built
+throughout the Assets>Assets Bundles>Build Assets Bundles menu. It will create
+a folder next to your Assets folders. Copy this folder (will be of the form
+AssetsBundles/<platform>/...) into the StreamingAssets folder in your project
+inside Unity (so you have StreamingAssets/AssetBundles/...).
+You can then build to your chosen platform.
 
 Services
 --------
@@ -36,22 +54,6 @@ to the default "rewardVideo" and "Video" :
 - reviveVideo, used to have a second chance after game over
 - missionVideo, used to get a thrid possible missions.
 
-
-AssetBundle Testing
--------------------
-
-To easily test in editor, set the AssetBundle manager into simulation mode
-To do this, go to the menu Assets > AssetBundles > Simulation Mode
-
-Building
---------
-
-To build the game, you will first need to build the asset bundles. They can be built
-throughout the Assets>Assets Bundles>Build Assets Bundles menu. It will create
-a folder next to your Assets folders. Copy this folder (will be of the form
-AssetsBundles/<platform>/...) into the StreamingAssets folder in your project
-inside Unity (so you have StreamingAssets/AssetBundles/...).
-You can then build to your chosen platform.
 
 Game States
 -----------
