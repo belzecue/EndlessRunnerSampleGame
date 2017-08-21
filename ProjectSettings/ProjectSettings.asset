@@ -141,11 +141,11 @@ PlayerSettings:
   targetPixelDensity: 0
   resolutionScalingMode: 0
   applicationIdentifier:
-    Android: com.unity.trashdash
-    Standalone: unity.Unity.Trash Dash
-    Tizen: com.unity.trashdash
-    iOS: com.unity.trashdash
-    tvOS: com.unity.trashdash
+    Android: 
+    Standalone: 
+    Tizen: 
+    iOS: 
+    tvOS: 
   buildNumber:
     iOS: 0
   AndroidBundleVersionCode: 350
