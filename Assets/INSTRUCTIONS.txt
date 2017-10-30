@@ -28,10 +28,10 @@ By default all the services are disabled. When you enable all services, switch t
 platform as some services (e.g. Ads) only works on mobile platforms.
 
 There is a special case for Unity In App Purchase : once you enable in app purchase
-in the service windows, it will import a package into your project. If you have errors of
-unfound StandardPurchasingModule class, the import may have failed, check in
-'Plugins/UnityPurchasing' folder and you should see a UnityIAP package.
-Double click it to import it, and it should fix those problems.
+in the service windows, it will import a package into your project. Check in
+'Plugins/UnityPurchasing' folder and you should see a UnityIAP and UnityChannel package.
+Double click on UnityIAP first, import its content, then on UnityChannel. IAP should now
+work in your project.
 
 Now go into 'Plugins/UnityPurchasing/Resources' and look for UIFakeStoreCanvas
 prefab, and change the Canvas sort order to 100. That will make it appear on

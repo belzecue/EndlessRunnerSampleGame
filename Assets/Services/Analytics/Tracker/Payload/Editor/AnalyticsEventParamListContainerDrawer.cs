@@ -2,7 +2,6 @@
 using UnityEditor;
 using System.Collections.Generic;
 using System.Reflection;
-using Mono.Security.Cryptography;
 using UnityEditorInternal;
 
 namespace UnityEngine.Analytics.Experimental.Tracker
