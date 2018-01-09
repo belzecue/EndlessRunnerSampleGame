@@ -309,7 +309,8 @@ namespace AssetBundles
 			else
 				download = UnityWebRequest.GetAssetBundle(url, s_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0);
 
-            download.Send();
+            download.SendWebRequest();
+
 			s_DownloadingWebrequests.Add(assetBundleName, download);
 	
 			return false;
