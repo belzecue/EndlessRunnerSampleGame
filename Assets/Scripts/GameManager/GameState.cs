@@ -7,7 +7,6 @@ using UnityEngine.Advertisements;
 #endif
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
-using UnityEngine.Analytics.Experimental;
 #endif
 
 /// <summary>

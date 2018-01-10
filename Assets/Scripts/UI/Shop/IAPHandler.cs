@@ -5,7 +5,6 @@ using UnityEngine.Purchasing;
 #endif
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
-using UnityEngine.Analytics.Experimental;
 #endif
 
 public class IAPHandler : MonoBehaviour

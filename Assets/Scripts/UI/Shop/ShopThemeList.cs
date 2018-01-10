@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
-using UnityEngine.Analytics.Experimental;
 #endif
 
 public class ShopThemeList : ShopList

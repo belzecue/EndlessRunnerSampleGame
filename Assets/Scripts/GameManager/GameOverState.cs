@@ -2,7 +2,6 @@
 using UnityEngine.UI;
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
-using UnityEngine.Analytics.Experimental;
 #endif
 using System.Collections.Generic;
  

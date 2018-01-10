@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
-using UnityEngine.Analytics.Experimental;
 #endif
 
 /// <summary>

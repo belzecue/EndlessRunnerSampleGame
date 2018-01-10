@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
-using UnityEngine.Analytics.Experimental;
 #endif
 #if UNITY_PURCHASING
 using UnityEngine.Purchasing;
