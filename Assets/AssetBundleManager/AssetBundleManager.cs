@@ -305,9 +305,9 @@ namespace AssetBundles
 		
 			// For manifest assetbundle, always download it as we don't have hash for it.
 			if (isLoadingAssetBundleManifest)
-				download = UnityWebRequest.GetAssetBundle(url);
+				download = UnityWebRequestAssetBundle.GetAssetBundle(url);
 			else
-				download = UnityWebRequest.GetAssetBundle(url, s_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0);
+				download = UnityWebRequestAssetBundle.GetAssetBundle(url, s_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0);
 
             download.SendWebRequest();
 
