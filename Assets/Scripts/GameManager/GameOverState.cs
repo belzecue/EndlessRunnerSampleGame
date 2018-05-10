@@ -21,8 +21,6 @@ public class GameOverState : AState
 
     public GameObject addButton;
 
-	protected bool m_CoinCredited = false;
-
     public override void Enter(AState from)
     {
         canvas.gameObject.SetActive(true);
@@ -36,8 +34,6 @@ public class GameOverState : AState
             missionPopup.Open();
         else
             missionPopup.gameObject.SetActive(false);
-
-		m_CoinCredited = false;
 
 		CreditCoins();
 
@@ -94,13 +90,6 @@ public class GameOverState : AState
 
     protected void CreditCoins()
 	{
-		if (m_CoinCredited)
-			return;
-
-		// -- give coins gathered
-		PlayerData.instance.coins += trackManager.characterController.coins;
-		PlayerData.instance.premium += trackManager.characterController.premium;
-
 		PlayerData.instance.Save();
 
 #if UNITY_ANALYTICS // Using Analytics Standard Events v0.3.0
@@ -137,8 +126,6 @@ public class GameOverState : AState
             );
         }
 #endif 
-
-        m_CoinCredited = true;
 	}
 
 	protected void FinishRun()
