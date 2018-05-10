@@ -308,10 +308,23 @@ public class CharacterInputController : MonoBehaviour
         }
     }
 
+    public void StopJumping()
+    {
+        if (m_Jumping)
+        {
+            character.animator.SetBool(s_JumpingHash, false);
+            m_Jumping = false;
+        }
+    }
+
 	public void Slide()
 	{
-		if (!m_Sliding && !m_Jumping)
+		if (!m_Sliding)
 		{
+
+		    if (m_Jumping)
+		        StopJumping();
+
             float correctSlideLength = slideLength * (1.0f + trackManager.speedRatio); 
 			m_SlideStart = trackManager.worldDistance;
             float animSpeed = k_TrackSpeedToJumpAnimSpeedRatio * (trackManager.speed / correctSlideLength);
