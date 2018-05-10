@@ -220,7 +220,12 @@ public class GameState : AState
 		if (pauseStatus) Pause();
 	}
 
-	public void Pause()
+    void OnApplicationFocus(bool focusStatus)
+    {
+        if (!focusStatus) Pause();
+    }
+
+    public void Pause()
 	{
 		//check if we aren't finished OR if we aren't already in pause (as that would mess states)
 		if (m_Finished || AudioListener.pause == true)
