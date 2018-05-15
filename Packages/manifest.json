@@ -1,4 +1,5 @@
 {
 	"dependencies": {
+	 "com.unity.addressables": "0.0.22-preview"
 	}
 }

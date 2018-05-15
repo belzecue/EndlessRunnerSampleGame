@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using AssetBundles;
+using UnityEngine.AddressableAssets;
 
 // Handles loading data from the Asset Bundle to handle different themes for the game
 public class ThemeDatabase
@@ -21,24 +21,21 @@ public class ThemeDatabase
         return list;
     }
 
-    static public IEnumerator LoadDatabase(List<string> packages)
+    static public IEnumerator LoadDatabase()
     {
         // If not null the dictionary was already loaded.
         if (themeDataList == null)
         {
             themeDataList = new Dictionary<string, ThemeData>();
 
-            foreach (string s in packages)
-            {
-                AssetBundleLoadAssetOperation op = AssetBundleManager.LoadAssetAsync(s, "themeData", typeof(ThemeData));
-                yield return CoroutineHandler.StartStaticCoroutine(op);
 
-                ThemeData list = op.GetAsset<ThemeData>();
-                if (list != null)
+            yield return Addressables.LoadAssets<ThemeData>("themeData", op =>
+            {
+                if (op.Result != null)
                 {
-                    themeDataList.Add(list.themeName, list);
+                    themeDataList.Add(op.Result.themeName, op.Result);
                 }
-            }
+            });
 
             m_Loaded = true;
         }
