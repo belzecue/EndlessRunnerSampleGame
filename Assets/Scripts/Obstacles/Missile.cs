@@ -40,7 +40,12 @@ public class Missile : Obstacle
 		obj.transform.forward = -obj.transform.forward;
 
 		obj.GetComponent<Missile>().m_OwnSegement = segment;
-	}
+
+	    //TODO : remove that hack related to #issue7
+	    Vector3 oldPos = obj.transform.position;
+	    obj.transform.position += Vector3.back;
+	    obj.transform.position = oldPos;
+    }
 
 	public override void Impacted()
 	{

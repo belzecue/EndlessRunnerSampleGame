@@ -509,7 +509,7 @@ public class TrackManager : MonoBehaviour
 				pos = pos + ((currentLane - 1) * laneOffset * (rot * Vector3.right));
 
 
-                GameObject toUse;
+                GameObject toUse = null;
 				if (Random.value < powerupChance)
 				{
                     int picked = Random.Range(0, consumableDatabase.consumbales.Length);
@@ -539,8 +539,13 @@ public class TrackManager : MonoBehaviour
 					toUse.transform.SetParent(segment.collectibleTransform, true);
 				}
 
-				
+                //TODO : remove that hack related to #issue7
+			    Vector3 oldPos = toUse.transform.position;
+                toUse.transform.position += Vector3.back;
+			    toUse.transform.position = oldPos;
 			}
+
+
 
 			currentWorldPos += increment;
 		}

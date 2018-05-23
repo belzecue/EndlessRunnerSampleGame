@@ -25,6 +25,11 @@ public class SimpleBarricade : Obstacle
             obj.transform.position += obj.transform.right * lane * segment.manager.laneOffset;
 
             obj.transform.SetParent(segment.objectRoot, true);
+
+            //TODO : remove that hack related to #issue7
+            Vector3 oldPos = obj.transform.position;
+            obj.transform.position += Vector3.back;
+            obj.transform.position = oldPos;
         }
     }
 }
