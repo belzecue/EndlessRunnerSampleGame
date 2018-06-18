@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 #if UNITY_ANALYTICS
-using UnityEngine.Analytics.Experimental;
+using UnityEngine.Analytics;
 #endif
 #if UNITY_EDITOR
 using UnityEditor;
