@@ -30,12 +30,8 @@ public class CharacterDatabase
         {
             m_CharactersDict = new Dictionary<string, Character>();
 
-            Debug.Log("Loading character ");
-
             yield return Addressables.LoadAssets<GameObject>("character", op =>
             {
-                Debug.Log("OPERATION " + op);
-                Debug.Log("OPERATION RESULT " + op.Result);
                 Character c = op.Result.GetComponent<Character>();
                 if (c != null)
                 {

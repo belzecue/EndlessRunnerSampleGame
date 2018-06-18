@@ -371,7 +371,7 @@ PlayerSettings:
     m_DynamicBatching: 0
   m_BuildTargetGraphicsAPIs:
   - m_BuildTarget: AndroidPlayer
-    m_APIs: 0b00000008000000
+    m_APIs: 0b0000000800000015000000
     m_Automatic: 0
   m_BuildTargetVRSettings:
   - m_BuildTarget: Android
@@ -450,9 +450,9 @@ PlayerSettings:
   enableInternalProfiler: 0
   logObjCUncaughtExceptions: 1
   enableCrashReportAPI: 0
-  cameraUsageDescription: Blabla test
-  locationUsageDescription: Blabla test
-  microphoneUsageDescription: Blabla test
+  cameraUsageDescription: 
+  locationUsageDescription: 
+  microphoneUsageDescription: 
   switchNetLibKey: 
   switchSocketMemoryPoolSize: 6144
   switchSocketAllocatorPoolSize: 128
@@ -712,7 +712,7 @@ PlayerSettings:
   webGLLinkerTarget: 0
   scriptingDefineSymbols:
     1: DEBUG_ANALYTICS_STANDARD_EVENTS;UNITY_POST_PROCESSING_STACK_V2
-    4: UNITY_SOCIAL;UNITY_ADS;DEBUG_ANALYTICS_STANDARD_EVENTS;UNITY_POST_PROCESSING_STACK_V2
+    4: UNITY_SOCIAL;DEBUG_ANALYTICS_STANDARD_EVENTS;UNITY_POST_PROCESSING_STACK_V2
     7: UNITY_SOCIAL;DEBUG_ANALYTICS_STANDARD_EVENTS;UNITY_POST_PROCESSING_STACK_V2
     13: UNITY_POST_PROCESSING_STACK_V2
     14: UNITY_POST_PROCESSING_STACK_V2
@@ -741,7 +741,10 @@ PlayerSettings:
   allowUnsafeCode: 0
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
-  apiCompatibilityLevelPerPlatform: {}
+  apiCompatibilityLevelPerPlatform:
+    Android: 6
+    Standalone: 6
+    iOS: 6
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: EndlessRunner
