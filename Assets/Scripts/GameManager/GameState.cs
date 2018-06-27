@@ -46,7 +46,14 @@ public class GameState : AState
     [Header("Prefabs")]
     public GameObject PowerupIconPrefab;
 
-	public Modifier currentModifier = new Modifier();
+    [Header("Tutorial")]
+    public Text tutorialValidatedObstacles;
+    public GameObject sideSlideTuto;
+    public GameObject upSlideTuto;
+    public GameObject downSlideTuto;
+    public GameObject finishTuto;
+
+    public Modifier currentModifier = new Modifier();
 
     public string adsPlacementId = "rewardedVideo";
 #if UNITY_ANALYTICS
@@ -66,6 +73,14 @@ public class GameState : AState
     protected bool m_GameoverSelectionDone = false;
 
     protected int k_MaxLives = 3;
+
+    protected bool m_IsTutorial; //Tutorial is a special run that don't chance section until the tutorial step is "validated".
+    protected int m_TutorialClearedObstacle = 0;
+    protected bool m_CountObstacles = true;
+    protected bool m_DisplayTutorial;
+    protected int m_CurrentSegmentObstacleIndex = 0;
+    protected TrackSegment m_NextValidSegment = null;
+    protected int k_ObstacleToClear = 3;
 
     public override void Enter(AState from)
     {
@@ -101,8 +116,14 @@ public class GameState : AState
         canvas.gameObject.SetActive(true);
         pauseMenu.gameObject.SetActive(false);
         wholeUI.gameObject.SetActive(true);
-        pauseButton.gameObject.SetActive(true);
+        pauseButton.gameObject.SetActive(!trackManager.isTutorial);
         gameOverPopup.SetActive(false);
+
+        sideSlideTuto.SetActive(false);
+        upSlideTuto.SetActive(false);
+        downSlideTuto.SetActive(false);
+        finishTuto.SetActive(false);
+        tutorialValidatedObstacles.gameObject.SetActive(false);
 
         if (!trackManager.isRerun)
         {
@@ -111,6 +132,40 @@ public class GameState : AState
         }
 
         currentModifier.OnRunStart(this);
+
+        m_IsTutorial = !PlayerData.instance.tutorialDone;
+        trackManager.isTutorial = m_IsTutorial;
+
+        if (m_IsTutorial)
+        {
+            tutorialValidatedObstacles.gameObject.SetActive(true);
+            tutorialValidatedObstacles.text = $"0/{k_ObstacleToClear}";
+
+            m_DisplayTutorial = true;
+            trackManager.newSegmentCreated = segment =>
+            {
+                if (trackManager.currentZone != 0 && !m_CountObstacles && m_NextValidSegment == null)
+                {
+                    m_NextValidSegment = segment;
+                }
+            };
+
+            trackManager.currentSegementChanged = segment =>
+            {
+                m_CurrentSegmentObstacleIndex = 0;
+
+                if (!m_CountObstacles && trackManager.currentSegment == m_NextValidSegment)
+                {
+                    trackManager.characterController.currentTutorialLevel += 1;
+                    m_CountObstacles = true;
+                    m_NextValidSegment = null;
+                    m_DisplayTutorial = true;
+
+                    tutorialValidatedObstacles.text = $"{m_TutorialClearedObstacle}/{k_ObstacleToClear}";
+                }
+            };
+        }
+
         trackManager.Begin();
 
         m_Finished = false;
@@ -129,7 +184,7 @@ public class GameState : AState
         {
             //if we are finished, we check if advertisement is ready, allow to disable the button until it is ready
 #if UNITY_ADS
-            if (!m_AdsInitialised && Advertisement.IsReady(adsPlacementId))
+            if (!trackManager.isTutorial && !m_AdsInitialised && Advertisement.IsReady(adsPlacementId))
             {
                 adsForLifeButton.SetActive(true);
                 m_AdsInitialised = true;
@@ -141,7 +196,7 @@ public class GameState : AState
             });
 #endif
             }
-            else if(!m_AdsInitialised)
+            else if(trackManager.isTutorial || !m_AdsInitialised)
                 adsForLifeButton.SetActive(false);
 #else
             adsForLifeButton.SetActive(false); //Ads is disabled
@@ -210,6 +265,9 @@ public class GameState : AState
             m_PowerupIcons.Remove(toRemoveIcon[i]);
         }
 
+        if(m_IsTutorial)
+            TutorialCheckObstacleClear();
+
         UpdateUI();
 
 		currentModifier.OnRunTick(this);
@@ -225,7 +283,7 @@ public class GameState : AState
         if (!focusStatus) Pause();
     }
 
-    public void Pause()
+    public void Pause(bool displayMenu = true)
 	{
 		//check if we aren't finished OR if we aren't already in pause (as that would mess states)
 		if (m_Finished || AudioListener.pause == true)
@@ -235,7 +293,7 @@ public class GameState : AState
 		Time.timeScale = 0;
 
 		pauseButton.gameObject.SetActive(false);
-        pauseMenu.gameObject.SetActive (true);
+        pauseMenu.gameObject.SetActive (displayMenu);
 		wholeUI.gameObject.SetActive(false);
 		m_WasMoving = trackManager.isMoving;
 		trackManager.StopMove();
@@ -446,4 +504,92 @@ public class GameState : AState
         }
     }
 #endif
+
+
+    void TutorialCheckObstacleClear()
+    {
+        if (trackManager.segments.Count == 0)
+            return;
+
+        if (AudioListener.pause && !trackManager.characterController.tutorialWaitingForValidation)
+        {
+            m_DisplayTutorial = false;
+            DisplayTutorial(false);
+        }
+
+        float ratio = trackManager.currentSegmentDistance / trackManager.currentSegment.worldLength;
+        float nextObstaclePosition = m_CurrentSegmentObstacleIndex < trackManager.currentSegment.obstaclePositions.Length ? trackManager.currentSegment.obstaclePositions[m_CurrentSegmentObstacleIndex] : float.MaxValue;
+
+        if (m_CountObstacles && ratio > nextObstaclePosition + 0.05f)
+        {
+            m_CurrentSegmentObstacleIndex += 1;
+
+            if (!trackManager.characterController.characterCollider.tutorialHitObstacle)
+            {
+                m_TutorialClearedObstacle += 1;
+                tutorialValidatedObstacles.text = $"{m_TutorialClearedObstacle}/{k_ObstacleToClear}";
+            }
+
+            trackManager.characterController.characterCollider.tutorialHitObstacle = false;
+
+            if (m_TutorialClearedObstacle == k_ObstacleToClear)
+            {
+                m_TutorialClearedObstacle = 0;
+                m_CountObstacles = false;
+                m_NextValidSegment = null;
+                trackManager.ChangeZone();
+
+                tutorialValidatedObstacles.text = "Passed!";
+
+                if (trackManager.currentZone == 0)
+                {//we looped, mean we finished the tutorial.
+                    trackManager.characterController.currentTutorialLevel = 3;
+                    DisplayTutorial(true);
+                }
+            }
+        }
+        else if (m_DisplayTutorial && ratio > nextObstaclePosition - 0.1f)
+            DisplayTutorial(true);
+    }
+
+    void DisplayTutorial(bool value)
+    {
+        if(value)
+            Pause(false);
+        else
+        {
+            Resume();
+        }
+
+        switch (trackManager.characterController.currentTutorialLevel)
+        {
+            case 0:
+                sideSlideTuto.SetActive(value);
+                trackManager.characterController.tutorialWaitingForValidation = value;
+                break;
+            case 1:
+                upSlideTuto.SetActive(value);
+                trackManager.characterController.tutorialWaitingForValidation = value;
+                break;
+            case 2:
+                downSlideTuto.SetActive(value);
+                trackManager.characterController.tutorialWaitingForValidation = value;
+                break;
+            case 3:
+                finishTuto.SetActive(value);
+                trackManager.characterController.tutorialWaitingForValidation = value;
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    public void FinishTutorial()
+    {
+        PlayerData.instance.tutorialDone = true;
+        PlayerData.instance.Save();
+
+        QuitToLoadout();
+    }
 }
