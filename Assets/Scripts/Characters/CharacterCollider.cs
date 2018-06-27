@@ -41,6 +41,10 @@ public class CharacterCollider : MonoBehaviour
     [HideInInspector]
 	public List<GameObject> magnetCoins = new List<GameObject>();
 
+    public bool tutorialHitObstacle {  get { return m_TutorialHitObstacle;} set { m_TutorialHitObstacle = value;} }
+
+    protected bool m_TutorialHitObstacle;
+
     protected bool m_Invincible;
     protected DeathEvent m_DeathData;
 	protected BoxCollider m_Collider;
@@ -137,7 +141,15 @@ public class CharacterCollider : MonoBehaviour
 				Destroy(c.gameObject);
 			}
 
-			controller.currentLife -= 1;
+            if (TrackManager.instance.isTutorial)
+            {
+                m_TutorialHitObstacle = true;
+            }
+            else
+            {
+                controller.currentLife -= 1;
+            }
+
             controller.character.animator.SetTrigger(s_HitHash);
 
 			if (controller.currentLife > 0)

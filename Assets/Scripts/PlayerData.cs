@@ -48,6 +48,7 @@ public class PlayerData
 	public string previousName = "Trash Cat";
 
     public bool licenceAccepted;
+    public bool tutorialDone;
 
 	public float masterVolume = float.MinValue, musicVolume = float.MinValue, masterSFXVolume = float.MinValue;
 
@@ -60,7 +61,7 @@ public class PlayerData
     // This will allow us to add data even after production, and so keep all existing save STILL valid. See loading & saving for how it work.
     // Note in a real production it would probably reset that to 1 before release (as all dev save don't have to be compatible w/ final product)
     // Then would increment again with every subsequent patches. We kept it to its dev value here for teaching purpose. 
-    static int s_Version = 11; 
+    static int s_Version = 12; 
 
     public void Consume(Consumable.ConsumableType type)
     {
@@ -378,6 +379,11 @@ public class PlayerData
             rank = r.ReadInt32();
         }
 
+        if (ver >= 12)
+        {
+            tutorialDone = r.ReadBoolean();
+        }
+
         r.Close();
     }
 
@@ -447,6 +453,8 @@ public class PlayerData
 
         w.Write(ftueLevel);
         w.Write(rank);
+
+        w.Write(tutorialDone);
 
         w.Close();
     }

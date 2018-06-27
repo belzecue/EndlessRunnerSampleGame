@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
+
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
 #endif
@@ -48,15 +50,23 @@ public class TrackManager : MonoBehaviour
 	public Transform parallaxRoot;
 	public float parallaxRatio = 0.5f;
 
+    [Header("Tutorial")]
+    public ThemeData tutorialThemeData;
+
+    public System.Action<TrackSegment> newSegmentCreated;
+    public System.Action<TrackSegment> currentSegementChanged;
+
 	public int trackSeed {  get { return m_TrackSeed; } set { m_TrackSeed = value; } }
 
     public float timeToStart { get { return m_TimeToStart; } }  // Will return -1 if already started (allow to update UI)
 
 	public int score { get { return m_Score; } }
 	public int multiplier {  get { return m_Multiplier; } }
+    public float currentSegmentDistance {  get { return m_CurrentSegmentDistance;} }
 	public float worldDistance {  get { return m_TotalWorldDistance; } }
 	public float speed {  get { return m_Speed; } }
 	public float speedRatio {  get { return (m_Speed - minSpeed) / (maxSpeed - minSpeed); } }
+    public int currentZone {  get { return m_CurrentZone;} }
 
 	public TrackSegment currentSegment { get { return m_Segments[0]; } }
 	public List<TrackSegment> segments { get { return m_Segments; } }
@@ -64,6 +74,8 @@ public class TrackManager : MonoBehaviour
 
 	public bool isMoving {  get { return m_IsMoving; } }
 	public bool isRerun { get { return m_Rerun; } set { m_Rerun = value; } }
+
+    public bool isTutorial {  get { return m_IsTutorial;} set {m_IsTutorial = value;}}
 
 	protected float m_TimeToStart = -1.0f;
 
@@ -94,6 +106,8 @@ public class TrackManager : MonoBehaviour
 	protected float m_ScoreAccum;
     protected bool m_Rerun;     // This lets us know if we are entering a game over (ads) state or starting a new game (see GameState)
 
+    protected bool m_IsTutorial; //Tutorial is a special run that don't chance section until the tutorial step is "validated" by the TutorialState.
+
     const float k_FloatingOriginThreshold = 10000f;
 
     protected const float k_CountdownToStartLength = 5f;
@@ -101,7 +115,7 @@ public class TrackManager : MonoBehaviour
     protected const float k_StartingSegmentDistance = 2f;
     protected const int k_StartingSafeSegments = 2;
     protected const int k_StartingCoinPoolSize = 256;
-    protected const int k_DesiredSegmentCount = 10;
+    protected const int k_DesiredSegmentCount = 5;
     protected const float k_SegmentRemovalDistance = -30f;
     protected const float k_Acceleration = 0.2f;
 
@@ -147,8 +161,8 @@ public class TrackManager : MonoBehaviour
 		StartMove();
 	}
 
-	public void Begin()
-	{
+    public void Begin()
+    {
 		if (!m_Rerun)
 		{
 			if (m_TrackSeed != -1)
@@ -176,7 +190,11 @@ public class TrackManager : MonoBehaviour
 			characterController.Init();
 			characterController.CheatInvincible(invincible);
 
-            m_CurrentThemeData = ThemeDatabase.GetThemeData(PlayerData.instance.themes[PlayerData.instance.usedTheme]);
+            if (m_IsTutorial)
+		        m_CurrentThemeData = tutorialThemeData;
+            else
+                m_CurrentThemeData = ThemeDatabase.GetThemeData(PlayerData.instance.themes[PlayerData.instance.usedTheme]);
+
 			m_CurrentZone = 0;
 			m_CurrentZoneDistance = 0;
 
@@ -192,7 +210,7 @@ public class TrackManager : MonoBehaviour
             m_Score = 0;
 			m_ScoreAccum = 0;
 
-            m_SafeSegementLeft = k_StartingSafeSegments;
+            m_SafeSegementLeft = m_IsTutorial ? 0 : k_StartingSafeSegments;
 
             Coin.coinPool = new Pooler(currentTheme.collectiblePrefab, k_StartingCoinPoolSize);
 
@@ -295,11 +313,12 @@ public class TrackManager : MonoBehaviour
 		{
 			m_CurrentSegmentDistance -= m_Segments[0].worldLength;
 
-			// m_PastSegments are segment we already passed, we keep them to move them and destroy them later 
-			// but they aren't part of the game anymore 
-			m_PastSegments.Add(m_Segments[0]);
-			m_Segments.RemoveAt(0);
+		    // m_PastSegments are segment we already passed, we keep them to move them and destroy them later 
+		    // but they aren't part of the game anymore 
+		    m_PastSegments.Add(m_Segments[0]);
+		    m_Segments.RemoveAt(0);
 
+            if(currentSegementChanged != null) currentSegementChanged.Invoke(m_Segments[0]);
 		}
 
 		Vector3 currentPos;
@@ -371,12 +390,15 @@ public class TrackManager : MonoBehaviour
 
 		PowerupSpawnUpdate();
 
-		if (m_Speed < maxSpeed)
-            m_Speed += k_Acceleration * Time.deltaTime;
-		else
-			m_Speed = maxSpeed;
+	    if (!m_IsTutorial)
+	    {
+	        if (m_Speed < maxSpeed)
+	            m_Speed += k_Acceleration * Time.deltaTime;
+	        else
+	            m_Speed = maxSpeed;
+	    }
 
-        m_Multiplier = 1 + Mathf.FloorToInt((m_Speed - minSpeed) / (maxSpeed - minSpeed) * speedStep);
+	    m_Multiplier = 1 + Mathf.FloorToInt((m_Speed - minSpeed) / (maxSpeed - minSpeed) * speedStep);
 
         if (modifyMultiply != null)
         {
@@ -386,20 +408,24 @@ public class TrackManager : MonoBehaviour
             }
         }
 
-        //check for next rank achieved
-        int currentTarget = (PlayerData.instance.rank + 1) * 300;
-        if(m_TotalWorldDistance > currentTarget)
-        {
-            PlayerData.instance.rank += 1;
-            PlayerData.instance.Save();
+	    if (!m_IsTutorial)
+	    {
+	        //check for next rank achieved
+	        int currentTarget = (PlayerData.instance.rank + 1) * 300;
+	        if (m_TotalWorldDistance > currentTarget)
+	        {
+	            PlayerData.instance.rank += 1;
+	            PlayerData.instance.Save();
 #if UNITY_ANALYTICS
-            //"level" in our game are milestone the player have to reach : one every 300m
+//"level" in our game are milestone the player have to reach : one every 300m
             AnalyticsEvent.LevelUp(PlayerData.instance.rank);
 #endif
-        }
+	        }
 
-        PlayerData.instance.UpdateMissions(this);
-        MusicPlayer.instance.UpdateVolumes(speedRatio);
+	        PlayerData.instance.UpdateMissions(this);
+	    }
+
+	    MusicPlayer.instance.UpdateVolumes(speedRatio);
     }
 
     public void PowerupSpawnUpdate()
@@ -408,15 +434,21 @@ public class TrackManager : MonoBehaviour
 		m_TimeSinceLastPremium += Time.deltaTime;
 	}
 
+    public void ChangeZone()
+    {
+        m_CurrentZone += 1;
+        if (m_CurrentZone >= m_CurrentThemeData.zones.Length)
+            m_CurrentZone = 0;
+
+        m_CurrentZoneDistance = 0;
+    }
+
 	public void SpawnNewSegment()
 	{
-		if(m_CurrentThemeData.zones[m_CurrentZone].length < m_CurrentZoneDistance)
+		if(!m_IsTutorial)
 		{
-			m_CurrentZone += 1;
-			if (m_CurrentZone >= m_CurrentThemeData.zones.Length)
-				m_CurrentZone = 0;
-
-			m_CurrentZoneDistance = 0;
+            if(m_CurrentThemeData.zones[m_CurrentZone].length < m_CurrentZoneDistance)
+			    ChangeZone();
 		}
 
 		int segmentUse = Random.Range(0, m_CurrentThemeData.zones[m_CurrentZone].prefabList.Length);
@@ -451,12 +483,16 @@ public class TrackManager : MonoBehaviour
 		newSegment.transform.localScale = new Vector3((Random.value > 0.5f ? -1 : 1), 1, 1);
 		newSegment.objectRoot.localScale = new Vector3(1.0f/newSegment.transform.localScale.x, 1, 1);
 
-		if (m_SafeSegementLeft <= 0)
-			SpawnObstacle(newSegment);
-		else
+	    if (m_SafeSegementLeft <= 0)
+	    {
+	        SpawnObstacle(newSegment);
+	    }
+	    else
 			m_SafeSegementLeft -= 1;
 
 		m_Segments.Add(newSegment);
+
+        if(newSegmentCreated != null) newSegmentCreated.Invoke(newSegment);
 	}
 
 
@@ -475,6 +511,9 @@ public class TrackManager : MonoBehaviour
 
 	public void SpawnCoinAndPowerup(TrackSegment segment)
 	{
+        if(m_IsTutorial)
+            return;
+
 		const float increment = 1.5f;
 		float currentWorldPos = 0.0f;
 		int currentLane = Random.Range(0,3);
@@ -545,13 +584,10 @@ public class TrackManager : MonoBehaviour
 			    toUse.transform.position = oldPos;
 			}
 
-
-
 			currentWorldPos += increment;
 		}
 
 	}
-
 
     public void AddScore(int amount)
 	{

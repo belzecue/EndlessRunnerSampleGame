@@ -81,25 +81,25 @@ MonoBehaviour:
     m_profileEntryNames:
     - id: 69cf8f249dc598b45a5cb839b6f5dd50
       name: <custom>
-      usage: 2
+      inlineUsage: 0
     - id: bd81bc449922b5147ababf2f6b6612ee
       name: ContentVersion
-      usage: 1024
+      inlineUsage: 0
     - id: 9c5024f76ae1ae64b9303d216d71e974
       name: BuildTarget
-      usage: 1024
+      inlineUsage: 0
     - id: ee173bb07aaf2614cb12fb11c6c7a76b
       name: LocalBuildPath
-      usage: 4
+      inlineUsage: 0
     - id: ca72daeb8fb09b54a893934025eb719f
       name: LocalLoadPrefix
-      usage: 8
+      inlineUsage: 0
     - id: 3f4857b04f259934ab805ff72be330b0
       name: RemoteBuildPath
-      usage: 4
+      inlineUsage: 0
     - id: d6416c83bbb63ff4f8e4bd8eaf0cbad0
       name: RemoteLoadPrefix
-      usage: 8
+      inlineUsage: 0
   m_labelTable:
     m_labelNames:
     - default
