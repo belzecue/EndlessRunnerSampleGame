@@ -9,8 +9,11 @@ public class SimpleBarricade : Obstacle
     
     public override void Spawn(TrackSegment segment, float t)
     {
-        int count = Random.Range(k_MinObstacleCount, k_MaxObstacleCount + 1);
-        int startLane = Random.Range(k_LeftMostLaneIndex, k_RightMostLaneIndex + 1);
+        //the tutorial very firts barricade need to be center and alone, so player can swipe safely in bother direction to avoid it
+        bool isTutorialFirst = TrackManager.instance.isTutorial && TrackManager.instance.segments.Count == 0;
+
+        int count = isTutorialFirst ? 1 : Random.Range(k_MinObstacleCount, k_MaxObstacleCount + 1);
+        int startLane = isTutorialFirst ? 0 : Random.Range(k_LeftMostLaneIndex, k_RightMostLaneIndex + 1);
 
         Vector3 position;
         Quaternion rotation;
@@ -25,6 +28,11 @@ public class SimpleBarricade : Obstacle
             obj.transform.position += obj.transform.right * lane * segment.manager.laneOffset;
 
             obj.transform.SetParent(segment.objectRoot, true);
+
+            //TODO : remove that hack related to #issue7
+            Vector3 oldPos = obj.transform.position;
+            obj.transform.position += Vector3.back;
+            obj.transform.position = oldPos;
         }
     }
 }

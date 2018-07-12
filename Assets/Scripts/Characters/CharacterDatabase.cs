@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using AssetBundles;
+using UnityEngine.AddressableAssets;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -24,23 +24,20 @@ public class CharacterDatabase
         return c;
     }
 
-    static public IEnumerator LoadDatabase(List<string> packages)
+    static public IEnumerator LoadDatabase()
     {
         if (m_CharactersDict == null)
         {
             m_CharactersDict = new Dictionary<string, Character>();
 
-            foreach (string s in packages)
+            yield return Addressables.LoadAssets<GameObject>("character", op =>
             {
-                AssetBundleLoadAssetOperation op = AssetBundleManager.LoadAssetAsync(s, "character", typeof(GameObject));
-                yield return CoroutineHandler.StartStaticCoroutine(op);
-
-                Character c = op.GetAsset<GameObject>().GetComponent<Character>();
+                Character c = op.Result.GetComponent<Character>();
                 if (c != null)
                 {
                     m_CharactersDict.Add(c.characterName, c);
                 }
-            }
+            });
 
             m_Loaded = true;
         }

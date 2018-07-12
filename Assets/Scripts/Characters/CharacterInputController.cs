@@ -41,6 +41,9 @@ public class CharacterInputController : MonoBehaviour
 	public AudioClip powerUpUseSound;
 	public AudioSource powerupSource;
 
+    [HideInInspector] public int currentTutorialLevel;
+    [HideInInspector] public bool tutorialWaitingForValidation;
+
     protected int m_Coins;
     protected int m_Premium;
     protected int m_CurrentLife;
@@ -153,24 +156,33 @@ public class CharacterInputController : MonoBehaviour
             character.animator.SetBool(s_MovingHash, false);
         }
     }
-	
+
+    protected bool TutorialMoveCheck(int tutorialLevel)
+    {
+        tutorialWaitingForValidation = currentTutorialLevel != tutorialLevel;
+
+        return (!TrackManager.instance.isTutorial || currentTutorialLevel == tutorialLevel);
+    }
+
 	protected void Update ()
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         // Use key input in editor or standalone
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        // disabled if it's tutorial and not thecurrent right tutorial level (see func TutorialMoveCheck)
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && TutorialMoveCheck(0))
         {
             ChangeLane(-1);
         }
-        else if(Input.GetKeyDown(KeyCode.RightArrow))
+        else if(Input.GetKeyDown(KeyCode.RightArrow) && TutorialMoveCheck(0))
         {
             ChangeLane(1);
         }
-        else if(Input.GetKeyDown(KeyCode.UpArrow))
+        else if(Input.GetKeyDown(KeyCode.UpArrow) && TutorialMoveCheck(1))
         {
             Jump();
         }
-		else if (Input.GetKeyDown(KeyCode.DownArrow))
+		else if (Input.GetKeyDown(KeyCode.DownArrow) && TutorialMoveCheck(2))
 		{
 			if(!m_Sliding)
 				Slide();
@@ -191,16 +203,16 @@ public class CharacterInputController : MonoBehaviour
 				{
 					if(Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
 					{
-						if(diff.y < 0)
+						if(TutorialMoveCheck(2) && diff.y < 0)
 						{
 							Slide();
 						}
-						else
+						else if(TutorialMoveCheck(1))
 						{
 							Jump();
 						}
 					}
-					else
+					else if(TutorialMoveCheck(0))
 					{
 						if(diff.x < 0)
 						{
@@ -351,8 +363,8 @@ public class CharacterInputController : MonoBehaviour
 
 	public void ChangeLane(int direction)
     {
-		if (!trackManager.isMoving)
-			return;
+		//if (!trackManager.isMoving)
+		//	return;
 
         int targetLane = m_CurrentLane + direction;
 

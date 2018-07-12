@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 #if UNITY_ANALYTICS
-using UnityEngine.Analytics.Experimental;
+using UnityEngine.Analytics;
 #endif
 #if UNITY_EDITOR
 using UnityEditor;
@@ -48,6 +48,7 @@ public class PlayerData
 	public string previousName = "Trash Cat";
 
     public bool licenceAccepted;
+    public bool tutorialDone;
 
 	public float masterVolume = float.MinValue, musicVolume = float.MinValue, masterSFXVolume = float.MinValue;
 
@@ -60,7 +61,7 @@ public class PlayerData
     // This will allow us to add data even after production, and so keep all existing save STILL valid. See loading & saving for how it work.
     // Note in a real production it would probably reset that to 1 before release (as all dev save don't have to be compatible w/ final product)
     // Then would increment again with every subsequent patches. We kept it to its dev value here for teaching purpose. 
-    static int s_Version = 11; 
+    static int s_Version = 12; 
 
     public void Consume(Consumable.ConsumableType type)
     {
@@ -208,7 +209,8 @@ public class PlayerData
             //if we create the PlayerData, mean it's the very first call, so we use that to init the database
             //this allow to always init the database at the earlier we can, i.e. the start screen if started normally on device
             //or the Loadout screen if testing in editor
-            AssetBundlesDatabaseHandler.Load();
+		    CoroutineHandler.StartStaticCoroutine(CharacterDatabase.LoadDatabase());
+		    CoroutineHandler.StartStaticCoroutine(ThemeDatabase.LoadDatabase());
         }
 
         m_Instance.saveFile = Application.persistentDataPath + "/save.bin";
@@ -377,6 +379,11 @@ public class PlayerData
             rank = r.ReadInt32();
         }
 
+        if (ver >= 12)
+        {
+            tutorialDone = r.ReadBoolean();
+        }
+
         r.Close();
     }
 
@@ -446,6 +453,8 @@ public class PlayerData
 
         w.Write(ftueLevel);
         w.Write(rank);
+
+        w.Write(tutorialDone);
 
         w.Close();
     }
