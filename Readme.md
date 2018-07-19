@@ -11,4 +11,4 @@ A INSTRUCTION.txt text file is inside the Asset folder to highlight diverse impo
 
 An article is available [on the Unity Learn website](https://unity3d.com/learn/tutorials/topics/mobile-touch/trash-dash-code-walkthrough) highlighting some part of the code.
 
-You can also go visit the [wiki](https://github.com/Unity-Technologies/TrashDash/wiki) for more in depth details on the projects, how to build it and modify it.
+You can also go visit the [wiki](https://github.com/Unity-Technologies/EndlessRunnerSampleGame/wiki) for more in depth details on the projects, how to build it and modify it.
