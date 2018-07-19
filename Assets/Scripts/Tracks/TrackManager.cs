@@ -127,6 +127,7 @@ public class TrackManager : MonoBehaviour
 
 	public void StartMove(bool isRestart = true)
 	{
+		characterController.StartMoving();
 		m_IsMoving = true;
 		if(isRestart)
 			m_Speed = minSpeed;
@@ -578,10 +579,13 @@ public class TrackManager : MonoBehaviour
 					toUse.transform.SetParent(segment.collectibleTransform, true);
 				}
 
-                //TODO : remove that hack related to #issue7
-			    Vector3 oldPos = toUse.transform.position;
-                toUse.transform.position += Vector3.back;
-			    toUse.transform.position = oldPos;
+				if (toUse != null)
+				{
+					//TODO : remove that hack related to #issue7
+					Vector3 oldPos = toUse.transform.position;
+					toUse.transform.position += Vector3.back;
+					toUse.transform.position = oldPos;
+				}
 			}
 
 			currentWorldPos += increment;

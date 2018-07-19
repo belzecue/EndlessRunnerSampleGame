@@ -9,7 +9,7 @@ public class RestartRunning : StateMachineBehaviour
         // We don't restart if we go toward the death state
         if (animator.GetBool(s_DeadHash))
             return; 
-
+        
         TrackManager.instance.StartMove();
     }
 

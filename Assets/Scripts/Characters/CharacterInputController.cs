@@ -53,7 +53,8 @@ public class CharacterInputController : MonoBehaviour
     protected int m_ObstacleLayer;
 
 	protected bool m_IsInvincible;
-
+	protected bool m_IsRunning;
+	
     protected float m_JumpStart;
     protected bool m_Jumping;
 
@@ -80,6 +81,7 @@ public class CharacterInputController : MonoBehaviour
         m_CurrentLife = 0;
         m_Sliding = false;
         m_SlideStart = 0.0f;
+	    m_IsRunning = false;
     }
 
 #if !UNITY_STANDALONE
@@ -116,6 +118,7 @@ public class CharacterInputController : MonoBehaviour
 	// Called at the beginning of a run or rerun
 	public void Begin()
 	{
+		m_IsRunning = false;
         character.animator.SetBool(s_DeadHash, false);
 
 		characterCollider.Init ();
@@ -140,7 +143,8 @@ public class CharacterInputController : MonoBehaviour
     }
 
     public void StartRunning()
-    {
+    {   
+	    StartMoving();
         if (character.animator)
         {
             character.animator.Play(s_RunStartHash);
@@ -148,8 +152,14 @@ public class CharacterInputController : MonoBehaviour
         }
     }
 
+	public void StartMoving()
+	{
+		m_IsRunning = true;
+	}
+
     public void StopMoving()
     {
+	    m_IsRunning = false;
         trackManager.StopMove();
         if (character.animator)
         {
@@ -304,6 +314,9 @@ public class CharacterInputController : MonoBehaviour
 
     public void Jump()
     {
+	    if (!m_IsRunning)
+		    return;
+	    
         if (!m_Jumping)
         {
 			if (m_Sliding)
@@ -331,6 +344,9 @@ public class CharacterInputController : MonoBehaviour
 
 	public void Slide()
 	{
+		if (!m_IsRunning)
+			return;
+		
 		if (!m_Sliding)
 		{
 
@@ -363,8 +379,8 @@ public class CharacterInputController : MonoBehaviour
 
 	public void ChangeLane(int direction)
     {
-		//if (!trackManager.isMoving)
-		//	return;
+		if (!m_IsRunning)
+			return;
 
         int targetLane = m_CurrentLane + direction;
 

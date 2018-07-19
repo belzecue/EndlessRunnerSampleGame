@@ -34,3 +34,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+Plugins.meta
+*/Plugins/Editor.meta
+*/Plugins/Editor/JetBrains
+*/Plugins/Editor/JetBrains.meta
